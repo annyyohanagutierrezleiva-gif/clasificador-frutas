@@ -33,12 +33,56 @@ def load_model():
         st.stop()
 
 
+# Traduccion palabra por palabra: el dataset Fruits-360 tiene mas de 200 clases
+# (variedades como "Apple Braeburn", "Tomato Cherry Red", etc.), asi que en vez de
+# traducir cada combinacion a mano, se traduce cada palabra conocida y se arma
+# el nombre completo en español.
+TRADUCCIONES = {
+    "apple": "Manzana", "apricot": "Albaricoque", "avocado": "Aguacate",
+    "banana": "Banana", "beetroot": "Remolacha", "blueberry": "Arándano",
+    "cactus": "Cactus", "fruit": "Fruta", "cantaloupe": "Melón Cantalupo",
+    "carambula": "Carambola", "cauliflower": "Coliflor", "cherry": "Cereza",
+    "wax": "Cera", "chestnut": "Castaña", "clementine": "Clementina",
+    "cocos": "Coco", "corn": "Maíz", "husk": "Cáscara", "cucumber": "Pepino",
+    "ripe": "Maduro", "dates": "Dátiles", "eggplant": "Berenjena", "fig": "Higo",
+    "ginger": "Jengibre", "root": "Raíz", "granadilla": "Granadilla",
+    "grape": "Uva", "grapefruit": "Toronja", "guava": "Guayaba",
+    "hazelnut": "Avellana", "huckleberry": "Arándano Silvestre", "kaki": "Caqui",
+    "kiwi": "Kiwi", "kohlrabi": "Colinabo", "kumquats": "Kumquat",
+    "lemon": "Limón", "meyer": "Meyer", "limes": "Lima", "lychee": "Lichi",
+    "mandarine": "Mandarina", "mango": "Mango", "mangostan": "Mangostán",
+    "maracuja": "Maracuyá", "melon": "Melón", "piel": "Piel", "de": "de",
+    "sapo": "Sapo", "mulberry": "Mora", "nectarine": "Nectarina",
+    "flat": "Plana", "nut": "Nuez", "forest": "Silvestre", "pecan": "Pecana",
+    "onion": "Cebolla", "peeled": "Pelada", "orange": "Naranja",
+    "papaya": "Papaya", "passion": "Pasión", "peach": "Durazno",
+    "pear": "Pera", "abate": "Abate", "forelle": "Forelle", "kaiser": "Kaiser",
+    "monster": "Monster", "stone": "Piedra", "williams": "Williams",
+    "pepino": "Pepino Dulce", "pepper": "Pimiento", "green": "Verde",
+    "yellow": "Amarillo", "physalis": "Physalis", "with": "con",
+    "pineapple": "Piña", "mini": "Mini", "pitahaya": "Pitahaya",
+    "plum": "Ciruela", "pomegranate": "Granada", "pomelo": "Pomelo",
+    "sweetie": "Sweetie", "potato": "Papa", "washed": "Lavada",
+    "sweet": "Dulce", "quince": "Membrillo", "rambutan": "Rambután",
+    "raspberry": "Frambuesa", "redcurrant": "Grosella Roja", "salak": "Salak",
+    "strawberry": "Fresa", "wedge": "Gajo", "tamarillo": "Tomate de Árbol",
+    "tangelo": "Tangelo", "tomato": "Tomate", "heart": "Corazón",
+    "maroon": "Granate", "not": "no", "ripened": "Maduro", "walnut": "Nuez",
+    "watermelon": "Sandía", "red": "Rojo", "pink": "Rosa", "white": "Blanco",
+    "blue": "Azul", "black": "Negro", "golden": "Dorada", "braeburn": "Braeburn",
+    "granny": "Granny", "smith": "Smith", "crimson": "Crimson", "snack": "Snack",
+    "rainier": "Rainier", "lady": "Lady", "finger": "Finger",
+}
+
+
 def formatear_nombre(nombre_clase):
-    """Convierte el nombre de la carpeta original del dataset (ej. 'Apple Braeburn')
-    en un texto un poco más prolijo para mostrar en la interfaz. Con más de 200
-    clases no es práctico traducir cada variedad al español, así que se muestra
-    el nombre original con formato de título."""
-    return nombre_clase.replace("_", " ").strip().title()
+    """Traduce el nombre de la clase original del dataset (ej. 'Apple Braeburn')
+    a español, palabra por palabra, usando el diccionario TRADUCCIONES. Las
+    palabras que no aparecen en el diccionario (por ejemplo nombres propios de
+    variedades) se dejan tal cual, solo con formato de título."""
+    palabras = nombre_clase.replace("_", " ").strip().split()
+    traducidas = [TRADUCCIONES.get(p.lower(), p.title()) for p in palabras]
+    return " ".join(traducidas)
 
 
 def predict_image(model, class_name, img: Image.Image):
@@ -54,12 +98,17 @@ def predict_image(model, class_name, img: Image.Image):
 # ---------- Barra lateral ----------
 with st.sidebar:
     st.header("🍇 Clasificador de Frutas")
-    st.caption("Anny Yohana Gutierrez — Cuenta: 20211930078")
+    st.caption("Arleth Adyani Chevez Bonilla — Cuenta: 20221900251")
     st.divider()
     st.write("**Modelo:** MobileNetV2 (Transfer Learning)")
     st.write("**Dataset:** Fruits-360 (Kaggle)")
     st.divider()
-    
+    st.info(
+        "Este modelo fue entrenado con imágenes de estudio del dataset "
+        "Fruits-360 (fondo uniforme, fruta centrada y sola). Con fotos "
+        "reales tomadas en un entorno natural la predicción puede ser "
+        "menos precisa."
+    )
 
 model, class_name = load_model()
 
