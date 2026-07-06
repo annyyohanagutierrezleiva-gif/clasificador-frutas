@@ -103,12 +103,7 @@ with st.sidebar:
     st.write("**Modelo:** MobileNetV2 (Transfer Learning)")
     st.write("**Dataset:** Fruits-360 (Kaggle)")
     st.divider()
-    st.info(
-        "Este modelo fue entrenado con imágenes de estudio del dataset "
-        "Fruits-360 (fondo uniforme, fruta centrada y sola). Con fotos "
-        "reales tomadas en un entorno natural la predicción puede ser "
-        "menos precisa."
-    )
+   
 
 model, class_name = load_model()
 
