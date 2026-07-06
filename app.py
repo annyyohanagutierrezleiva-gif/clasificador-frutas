@@ -51,7 +51,17 @@ def predict_image(model, class_name, img: Image.Image):
     return [(class_name[i], preds[i]) for i in top_idx]
 
 
+# ---------- Barra lateral ----------
+with st.sidebar:
+    st.header("🍇 Clasificador de Frutas")
+    st.caption("Anny Yohana Gutierrez — Cuenta: 20211930078")
+    st.divider()
+    st.write("**Modelo:** MobileNetV2 (Transfer Learning)")
+    st.write("**Dataset:** Fruits-360 (Kaggle)")
+    st.divider()
+    
 
+model, class_name = load_model()
 
 # ---------- Encabezado ----------
 st.title("Clasificador de Frutas con MobileNetV2")
