@@ -9,6 +9,8 @@ IMG_SIZE = (224, 224)
 MODEL_PATH = "modelo_frutas_mobilenet/frutas_mobilenet.h5"
 CLASSES_PATH = "modelo_frutas_mobilenet/class_name.json"
 
+st.set_page_config(page_title="Clasificador de Frutas", page_icon="🍎", layout="wide")
+
 
 @st.cache_resource
 def load_model():
@@ -21,7 +23,7 @@ def load_model():
         return model, class_name
     except FileNotFoundError:
         st.error(
-            "No se encontraron los archivos del modelo. Verificá que la carpeta "
+            "No se encontraron los archivos del modelo. Verifica que la carpeta "
             f"'modelo_frutas_mobilenet' con '{MODEL_PATH.split('/')[-1]}' y "
             f"'{CLASSES_PATH.split('/')[-1]}' esté junto a app.py."
         )
@@ -49,43 +51,62 @@ def predict_image(model, class_name, img: Image.Image):
     return [(class_name[i], preds[i]) for i in top_idx]
 
 
-st.set_page_config(page_title="Clasificador de Frutas")
-st.title("Clasificador de Frutas con MobileNetV2")
-st.caption("Arleth Adyani Chevez Bonilla — Cuenta: 20221900251")
+# ---------- Barra lateral ----------
+with st.sidebar:
+    st.header("🍇 Clasificador de Frutas")
+    st.caption("Arleth Adyani Chevez Bonilla — Cuenta: 20221900251")
+    st.divider()
+    st.write("**Modelo:** MobileNetV2 (Transfer Learning)")
+    st.write("**Dataset:** Fruits-360 (Kaggle)")
+    st.divider()
+    st.info(
+        "Este modelo fue entrenado con imágenes de estudio del dataset "
+        "Fruits-360 (fondo uniforme, fruta centrada y sola). Con fotos "
+        "reales tomadas en un entorno natural la predicción puede ser "
+        "menos precisa."
+    )
 
+model, class_name = load_model()
+
+# ---------- Encabezado ----------
+st.title("Clasificador de Frutas con MobileNetV2")
 st.write(
     "Sube una imagen de una fruta o verdura (el dataset Fruits-360 incluye ambas) "
     "y el modelo predecirá su categoría."
 )
 
-st.info(
-    "ℹ️ Este modelo fue entrenado con imágenes de estudio del dataset Fruits-360 "
-    "(fondo uniforme, fruta centrada y sola). Funciona mejor con fotos parecidas "
-    "a esas; con fotos reales tomadas en un entorno natural (con hojas, ramas u "
-    "otros fondos) la predicción puede ser menos precisa, ya que el modelo nunca "
-    "vio ese tipo de imágenes durante el entrenamiento."
-)
+st.divider()
 
-model, class_name = load_model()
+# ---------- Carga de imagen y resultados ----------
+col_img, col_res = st.columns(2)
 
-uploaded_file = st.file_uploader("Sube una imagen", type=["jpg", "jpeg", "png"])
+with col_img:
+    st.subheader("📷 Imagen")
+    uploaded_file = st.file_uploader("Sube una imagen", type=["jpg", "jpeg", "png"])
 
-if uploaded_file is not None:
-    try:
-        img = Image.open(uploaded_file)
-    except Exception:
-        st.error("No se pudo abrir la imagen. Probá con otro archivo JPG o PNG.")
-        st.stop()
+    if uploaded_file is not None:
+        try:
+            img = Image.open(uploaded_file)
+        except Exception:
+            st.error("No se pudo abrir la imagen. Probá con otro archivo JPG o PNG.")
+            st.stop()
 
-    st.image(img, caption="Imagen cargada", use_container_width=True)
+        st.image(img, caption="Imagen cargada", use_container_width=True)
 
-    with st.spinner("Analizando imagen..."):
-        results = predict_image(model, class_name, img)
+with col_res:
+    st.subheader("🔍 Resultado")
 
-    top_class, top_prob = results[0]
-    st.success(f"Predicción: **{formatear_nombre(top_class)}** ({top_prob*100:.2f}%)")
+    if uploaded_file is None:
+        st.write("Aquí aparecerá la predicción una vez que subas una imagen.")
+    else:
+        with st.spinner("Analizando imagen..."):
+            results = predict_image(model, class_name, img)
 
-    st.subheader("Top 5 probabilidades")
-    for raw, prob in results[:5]:
-        st.write(f"{formatear_nombre(raw)}: {prob*100:.2f}%")
-        st.progress(float(prob))
+        top_class, top_prob = results[0]
+
+        st.metric("Predicción", formatear_nombre(top_class), f"{top_prob*100:.2f}% de confianza")
+
+        st.write("**Top 5 probabilidades**")
+        for raw, prob in results[:5]:
+            st.write(f"{formatear_nombre(raw)} — {prob*100:.2f}%")
+            st.progress(float(prob))
