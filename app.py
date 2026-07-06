@@ -98,7 +98,7 @@ def predict_image(model, class_name, img: Image.Image):
 # ---------- Barra lateral ----------
 with st.sidebar:
     st.header("🍇 Clasificador de Frutas")
-    st.caption("Arleth Adyani Chevez Bonilla — Cuenta: 20221900251")
+    st.caption("Anny Yohana Gutierrez — Cuenta: 20211930078")
     st.divider()
     st.write("**Modelo:** MobileNetV2 (Transfer Learning)")
     st.write("**Dataset:** Fruits-360 (Kaggle)")
